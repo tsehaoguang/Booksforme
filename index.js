@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ownBooksList = document.getElementById('ownBooksList');
     const wishlistBooksList = document.getElementById('wishlistBooksList');
 
+    // Load books from local storage when the page loads
+    loadBooksFromStorage();
+
     bookForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -18,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             insertBookItemAlphabetically(wishlistBooksList, bookItem);
         }
+
+        // Save all books to local storage
+        saveBooksToStorage();
 
         bookForm.reset();
     });
@@ -35,6 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteButton.className = 'delete-button';
         deleteButton.addEventListener('click', () => {
             bookItem.remove();
+            // Remove the book from local storage
+            removeBookFromStorage(bookItem);
+            // Save the updated book list to local storage
+            saveBooksToStorage();
         });
 
         editButton.textContent = 'Edit';
@@ -56,6 +66,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 bookItem.remove();
                 const newBookItem = createBookItem(title, author, description, false);
                 insertBookItemAlphabetically(ownBooksList, newBookItem);
+                // Update the book category in local storage
+                updateBookCategoryInStorage(newBookItem, 'own');
+                // Save the updated book list to local storage
+                saveBooksToStorage();
             });
             bookItem.appendChild(moveButton);
         }
@@ -81,6 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const newDescription = descriptionInput.value;
             bookItem.querySelector('p') ? bookItem.querySelector('p').textContent = newDescription : bookItem.querySelector('div').innerHTML += `<p>${newDescription}</p>`;
             editForm.style.display = 'none';
+            // Update the book description in local storage
+            updateBookDescriptionInStorage(bookItem, newDescription);
+            // Save the updated book list to local storage
+            saveBooksToStorage();
         });
 
         editForm.appendChild(descriptionLabel);
@@ -108,4 +126,34 @@ document.addEventListener('DOMContentLoaded', () => {
             list.appendChild(bookItem);
         }
     }
-});
+
+    function loadBooksFromStorage() {
+        const storedBooks = localStorage.getItem('books');
+        if (storedBooks) {
+            const books = JSON.parse(storedBooks);
+            books.forEach(book => {
+                const bookItem = createBookItem(book.title, book.author, book.description, book.category === 'wishlist');
+                if (book.category === 'own') {
+                    ownBooksList.appendChild(bookItem);
+                } else {
+                    wishlistBooksList.appendChild(bookItem);
+                }
+            });
+        }
+    }
+
+    function saveBooksToStorage() {
+        const books = [];
+
+        // Iterate through each book item in both lists and add its details to the array
+        ownBooksList.querySelectorAll('li').forEach(bookItem => {
+            const title = bookItem.querySelector('strong').textContent;
+            const author = bookItem.querySelector('div').textContent.split('by')[1].trim();
+            const description = bookItem.querySelector('p') ? bookItem.querySelector('p').textContent : '';
+            books.push({ title, author, description, category: 'own' });
+        });
+
+        wishlistBooksList.querySelectorAll('li').forEach(bookItem => {
+            const title = bookItem.querySelector('strong').textContent;
+            const author = bookItem.querySelector('div').textContent.split('by')[1].trim();
+            const description = bookItem.querySelector('p') ? bookItem.querySelector('
