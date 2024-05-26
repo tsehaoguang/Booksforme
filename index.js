@@ -1,5 +1,3 @@
-I apologize for the confusion. Let's revisit the implementation to ensure that the data persists correctly. One common issue might be the handling of JSON data when storing and retrieving from local storage. Here's a revised version of the script.js file:
-
 ```javascript
 document.addEventListener('DOMContentLoaded', () => {
     const bookForm = document.getElementById('bookForm');
